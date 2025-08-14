@@ -1,0 +1,4 @@
+paymentType,CBSI,repFirstName,clientFirstName,clientLastName,insuranceCompany,paymentStrtDate,paymentEndDate,payment100,payment50,offerAt100Low,offerAt100High,offerAt50Low,offerAt50High,lifeInsurancePayment100,lifeInsurancePayment50,phone1,phone2,phone3,status
+LCP,784841,Scott,James,Takori,Takon,5/1/2024,7/24/2048,7000.00,3500.00,541880.21,684188.75,289504.70,324193.38,860000.00,430000.00,(800) 568-8087,(309) 828-1755,(949) 578-7063,New
+LCP,786576,Scott,Cheryl,Doel,AGS,5/1/2024,7/23/2053,1594.73,797.37,184134.94,189210.28,82137.41,92780.94,420000.00,210000.00,(714) 508-1002,,,New
+LCP,784824,Scott,Colon,Metlife,Metlife,5/14/2024,7/23/2053,562.78,281.39,57895.82,71521.84,23547.51,28160.42,100000.00,50000.00,(502) 342-7577,(502) 726-1620,(612) 643-6814,New
