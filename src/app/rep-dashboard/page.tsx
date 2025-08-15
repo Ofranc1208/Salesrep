@@ -1,355 +1,111 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import LeadList from './components/LeadList';
+import React, { useState } from 'react';
 import LeadManagement from './components/LeadManagement';
-import { mockLeads, campaignInfo } from './utils/mock-data';
-import {
-  getStatusColor,
-  getStatusText,
-  getPhoneStatusColor,
-  getPhoneStatusTextColor,
-  getPhoneStatusText,
-  getRelationshipText,
-  getNextStatus
-} from './utils/status-helpers';
-import { Lead, TabType, PhoneNumber } from './types';
+import CampaignManager from './components/CampaignManager';
+import { useLeadManagement } from './hooks/useLeadManagement';
+import { useCampaignManagement } from './hooks/useCampaignManagement';
+import { useTemplates } from './hooks/useTemplates';
+import { getStatusColor, getStatusText, getPhoneStatusColor, getPhoneStatusTextColor, getPhoneStatusText, getRelationshipText, getNextStatus } from './utils/status-helpers';
+import { useSharedDataFlow } from './hooks/useSharedDataFlow';
+import ConnectionStatus from './components/ConnectionStatus';
+import AIWindow from './components/AIWindow';
+import { CampaignInfo, TabType } from './types';
+import { campaignLeads } from './utils/mock-data/campaign-leads';
+
+// Default campaign info
+const campaignInfo: CampaignInfo = {
+  name: 'Q1 Structured Settlement Buyout',
+  totalLeads: 300,
+  processedLeads: 0,
+  startDate: '2024-01-01',
+  endDate: '2024-03-31'
+};
 
 export default function RepDashboard() {
-  const [repName] = useState('Client Relations Rep One');
-  const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
-  const [selectedPhoneNumber, setSelectedPhoneNumber] = useState<string>('');
-  const [copiedMessage, setCopiedMessage] = useState<string>('');
-  const [leads, setLeads] = useState<Lead[]>(mockLeads);
   const [activeTab, setActiveTab] = useState<TabType>('overview');
-  const [currentLeadIndex, setCurrentLeadIndex] = useState(0);
+  const [activeLeadList, setActiveLeadList] = useState<'prospect' | 'hot' | 'warm' | 'active'>('prospect');
 
-  const generateMessage = (lead: Lead, phoneNumber: string, messageType: 'initial' | 'follow-up' = 'initial') => {
-    if (messageType === 'initial') {
-      return `Hey ${lead.clientName}, It's Scott with Smarter Payouts. Your ${lead.insuranceCompany} payments allow you to take advantage of our Early payout program to buy a house, start a business, pay off debt and a lot more. Would you like to see how much you might be entitled to with zero obligation?`;
-    } else {
-      const details = lead.structuredSettlementDetails;
-      return `Hey ${lead.clientName}, It's Scott hope all is well. Ins Company ${lead.insuranceCompany} Early Payout ${details.offerAmount}. ${details.monthlyPayment} monthly. ${details.startDate} till ${details.endDate}. Family Protection ${details.totalValue}. Hurry offer expires soon. Funding as quick as in 30 days`;
-    }
+  // Lead Management Hook
+  const leadManagement = useLeadManagement();
+
+  // Campaign Management Hook
+  const campaignManagement = useCampaignManagement();
+
+  // Get current campaign leads based on active lead list
+  const getCurrentCampaignLeads = () => {
+    return campaignLeads[activeLeadList] || [];
   };
 
-  const handleLeadSelect = (lead: Lead) => {
-    setSelectedLead(lead);
-    const primaryWorking = lead.phoneNumbers.find((p) => p.isPrimary && p.status === 'working');
-    const workingNumber = primaryWorking || lead.phoneNumbers.find((p) => p.status === 'working');
-    const selectedNumber = workingNumber?.number || lead.phoneNumbers[0]?.number || '';
-    setSelectedPhoneNumber(selectedNumber);
-    setCopiedMessage(generateMessage(lead, selectedNumber));
-    
-    // Update current lead index
-    const index = leads.findIndex(l => l.id === lead.id);
-    if (index !== -1) {
-      setCurrentLeadIndex(index);
-    }
-  };
-
-  const handlePhoneNumberSelect = (phoneNumber: string) => {
-    if (selectedLead) {
-      setSelectedPhoneNumber(phoneNumber);
-      setCopiedMessage(generateMessage(selectedLead, phoneNumber));
-    }
-  };
-
-  const handleCopyMessage = async () => {
-    try {
-      await navigator.clipboard.writeText(copiedMessage);
-      const button = document.getElementById('copyButton');
-      if (button) {
-        button.textContent = 'Copied! ✓';
-        button.className = 'px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium';
-        
-        setTimeout(() => {
-          button.textContent = 'Copy Message';
-          button.className = 'px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium';
-        }, 2000);
-      }
-    } catch (err) {
-      console.error('Failed to copy message:', err);
-      alert('Failed to copy message. Please copy manually.');
-    }
-  };
-
-  const handleNextPhoneNumber = () => {
-    if (!selectedLead) return;
-    
-    const currentIndex = selectedLead.phoneNumbers.findIndex((p) => p.number === selectedPhoneNumber);
-    if (currentIndex !== -1 && currentIndex < selectedLead.phoneNumbers.length - 1) {
-      const nextPhoneNumber = selectedLead.phoneNumbers[currentIndex + 1].number;
-      setSelectedPhoneNumber(nextPhoneNumber);
-      setCopiedMessage(generateMessage(selectedLead, nextPhoneNumber));
-      
-      // Update phone numbers processed count
-      updatePhoneNumbersProcessed(selectedLead.id, currentIndex + 2);
-    } else if (currentIndex === selectedLead.phoneNumbers.length - 1) {
-      // All phone numbers processed for this lead, move to next lead
-      handleLeadComplete(selectedLead.id);
-    }
-  };
-
-  const handlePreviousPhoneNumber = () => {
-    if (!selectedLead) return;
-    
-    const currentIndex = selectedLead.phoneNumbers.findIndex((p) => p.number === selectedPhoneNumber);
-    if (currentIndex > 0) {
-      const previousPhoneNumber = selectedLead.phoneNumbers[currentIndex - 1].number;
-      setSelectedPhoneNumber(previousPhoneNumber);
-      setCopiedMessage(generateMessage(selectedLead, previousPhoneNumber));
-      
-      // Update phone numbers processed count
-      updatePhoneNumbersProcessed(selectedLead.id, currentIndex);
-    } else if (currentIndex === 0) {
-      const lastPhoneNumber = selectedLead.phoneNumbers[selectedLead.phoneNumbers.length - 1].number;
-      setSelectedPhoneNumber(lastPhoneNumber);
-      setCopiedMessage(generateMessage(selectedLead, lastPhoneNumber));
-      
-      // Update phone numbers processed count
-      updatePhoneNumbersProcessed(selectedLead.id, selectedLead.phoneNumbers.length);
-    }
-  };
-
-  const updatePhoneNumbersProcessed = (leadId: number, count: number) => {
-    setLeads(prevLeads => 
-      prevLeads.map(lead => 
-        lead.id === leadId 
-          ? { ...lead, phoneNumbersProcessed: Math.min(count, lead.phoneNumbers.length) }
-          : lead
-      )
-    );
-  };
-
-  const handleLeadComplete = (leadId: number) => {
-    // Mark current lead as processed
-    setLeads(prevLeads => 
-      prevLeads.map(lead => 
-        lead.id === leadId 
-          ? { ...lead, processed: true, phoneNumbersProcessed: lead.phoneNumbers.length }
-          : lead
-      )
-    );
-
-    // Auto-advance to next lead
-    const nextIndex = currentLeadIndex + 1;
-    if (nextIndex < leads.length) {
-      const nextLead = leads[nextIndex];
-      setCurrentLeadIndex(nextIndex);
-      handleLeadSelect(nextLead);
-    } else {
-      // All leads processed
-      setSelectedLead(null);
-      setSelectedPhoneNumber('');
-      setCopiedMessage('');
-      setCurrentLeadIndex(0);
-    }
-  };
-
-  const markLeadComplete = (leadId: number) => {
-    handleLeadComplete(leadId);
-  };
-
-  const updatePhoneNumberStatus = (leadId: number, phoneNumber: string, newStatus: string) => {
-    console.log(`Updating phone ${phoneNumber} status to ${newStatus} for lead ${leadId}`);
-    
-    // Update the lead's phone numbers
-    setLeads(prevLeads => 
-      prevLeads.map(lead => 
-        lead.id === leadId 
-          ? {
-              ...lead,
-              phoneNumbers: lead.phoneNumbers.map(phone => 
-                phone.number === phoneNumber 
-                  ? { 
-                      ...phone, 
-                      status: newStatus,
-                      auditTrail: [
-                        ...(phone.auditTrail || []),
-                        {
-                          id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-                          field: 'status',
-                          oldValue: phone.status,
-                          newValue: newStatus,
-                          editedBy: repName,
-                          editedAt: new Date().toISOString()
-                        }
-                      ]
-                    }
-                  : phone
-              )
-            }
-          : lead
-      )
-    );
-  };
-
-  const updatePhoneNumberType = (leadId: number, phoneNumber: string, newType: string) => {
-    console.log(`Updating phone ${phoneNumber} type to ${newType} for lead ${leadId}`);
-    
-    setLeads(prevLeads => 
-      prevLeads.map(lead => 
-        lead.id === leadId 
-          ? {
-              ...lead,
-              phoneNumbers: lead.phoneNumbers.map(phone => 
-                phone.number === phoneNumber 
-                  ? { 
-                      ...phone, 
-                      type: newType,
-                      auditTrail: [
-                        ...(phone.auditTrail || []),
-                        {
-                          id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-                          field: 'type',
-                          oldValue: phone.type,
-                          newValue: newType,
-                          editedBy: repName,
-                          editedAt: new Date().toISOString()
-                        }
-                      ]
-                    }
-                  : phone
-              )
-            }
-          : lead
-      )
-    );
-  };
-
-  const updatePhoneNumberRelationship = (leadId: number, phoneNumber: string, newRelationship: string) => {
-    console.log(`Updating phone ${phoneNumber} relationship to ${newRelationship} for lead ${leadId}`);
-    
-    setLeads(prevLeads => 
-      prevLeads.map(lead => 
-        lead.id === leadId 
-          ? {
-              ...lead,
-              phoneNumbers: lead.phoneNumbers.map(phone => 
-                phone.number === phoneNumber 
-                  ? { 
-                      ...phone, 
-                      relationship: newRelationship,
-                      auditTrail: [
-                        ...(phone.auditTrail || []),
-                        {
-                          id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-                          field: 'relationship',
-                          oldValue: phone.relationship,
-                          newValue: newRelationship,
-                          editedBy: repName,
-                          editedAt: new Date().toISOString()
-                        }
-                      ]
-                    }
-                  : phone
-              )
-            }
-          : lead
-      )
-    );
-  };
-
-  const updatePhoneNumberNotes = (leadId: number, phoneNumber: string, newNotes: string) => {
-    console.log(`Updating phone ${phoneNumber} notes to ${newNotes} for lead ${leadId}`);
-    
-    setLeads(prevLeads => 
-      prevLeads.map(lead => 
-        lead.id === leadId 
-          ? {
-              ...lead,
-              phoneNumbers: lead.phoneNumbers.map(phone => 
-                phone.number === phoneNumber 
-                  ? { 
-                      ...phone, 
-                      notes: newNotes,
-                      auditTrail: [
-                        ...(phone.auditTrail || []),
-                        {
-                          id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-                          field: 'notes',
-                          oldValue: phone.notes || '',
-                          newValue: newNotes,
-                          editedBy: repName,
-                          editedAt: new Date().toISOString()
-                        }
-                      ]
-                    }
-                  : phone
-              )
-            }
-          : lead
-      )
-    );
-  };
-
-  const addPhoneNumberToLead = (leadId: number, newPhoneNumber: PhoneNumber) => {
-    console.log(`Adding new phone number ${newPhoneNumber.number} to lead ${leadId}`);
-    
-    // Add audit trail for the new phone number
-    const phoneWithAudit = {
-      ...newPhoneNumber,
-      auditTrail: [{
-        id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-        field: 'created',
-        oldValue: '',
-        newValue: 'Phone number added',
-        editedBy: repName,
-        editedAt: new Date().toISOString()
-      }]
+  // Get current campaign info for display
+  const getCurrentCampaignInfo = () => {
+    const currentLeads = getCurrentCampaignLeads();
+    return {
+      name: `${activeLeadList.charAt(0).toUpperCase() + activeLeadList.slice(1)} List`,
+      totalLeads: currentLeads.length,
+      processedLeads: currentLeads.filter(lead => lead.processed).length
     };
-    
-    setLeads(prevLeads => 
-      prevLeads.map(lead => 
-        lead.id === leadId 
-          ? {
-              ...lead,
-              phoneNumbers: [...lead.phoneNumbers, phoneWithAudit]
-            }
-          : lead
-      )
-    );
   };
 
-  // Auto-select first lead on component mount
-  useEffect(() => {
-    if (leads.length > 0 && !selectedLead) {
-      handleLeadSelect(leads[0]);
-    }
-  }, []);
+
+
+  // Shared Data Flow Hook - Connect to Manager Dashboard
+  // Use 'rep-1' to match the Manager Dashboard's rep ID system
+  const sharedDataFlow = useSharedDataFlow('rep-1');
+
+  // Template Management Hook
+  const templateSystem = useTemplates('Client Relations Rep One');
+
+  // Get current campaign info
+  const currentCampaignInfo = campaignManagement.campaigns.find(c => c.id === campaignManagement.selectedCampaignId) || campaignInfo;
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-6">
-            <div className="flex items-center space-x-4">
+    <div className="h-screen bg-gray-50 flex flex-col overflow-hidden">
+      {/* Responsive Header - Optimized for 27" Monitor & Laptops */}
+      <div className="bg-white shadow-sm border-b border-gray-200 flex-shrink-0">
+        <div className="max-w-screen-2xl mx-auto px-6 lg:px-8">
+          <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center py-6 space-y-4 lg:space-y-0">
+            <div className="flex items-center space-x-4 lg:space-x-6">
               <div className="flex-shrink-0">
-                <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                  <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                <div className="w-10 h-10 lg:w-12 lg:h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                  <svg className="w-6 h-6 lg:w-7 lg:h-7 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                   </svg>
                 </div>
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">Sales Rep Dashboard</h1>
-                <div className="flex items-center space-x-3 mt-1">
-                  <p className="text-sm text-gray-600">Welcome, <span className="font-medium text-gray-900">{repName}</span></p>
-                  <span className="text-gray-300">•</span>
-                  <p className="text-sm text-blue-600 font-medium">Structured Settlement Buyouts</p>
+                <h1 className="text-xl lg:text-3xl font-bold text-gray-900">Sales Rep Dashboard</h1>
+                <div className="flex flex-col lg:flex-row lg:items-center lg:space-x-4 mt-1 lg:mt-2">
+                  <p className="text-sm lg:text-base text-gray-600">Welcome, <span className="font-semibold text-gray-900">Client Relations Rep One</span></p>
+                  <span className="hidden lg:block text-gray-300">•</span>
+                  <p className="text-sm lg:text-base text-blue-600 font-semibold">Structured Settlement Buyouts</p>
                 </div>
               </div>
             </div>
-            <div className="flex items-center space-x-4">
-              <div className="text-right">
-                <div className="text-sm text-gray-500">Pending</div>
-                <div className="text-xl font-semibold text-orange-600">{leads.filter(l => l.status === 'pending').length}</div>
+            <div className="flex flex-col lg:flex-row lg:items-center space-y-4 lg:space-y-0 lg:space-x-6">
+              <div className="grid grid-cols-3 gap-4 lg:gap-6 text-center">
+                <div>
+                  <div className="text-xs lg:text-sm text-gray-500">Pending</div>
+                  <div className="text-lg lg:text-2xl font-bold text-orange-600">
+                    {sharedDataFlow.isConnected ? sharedDataFlow.stats.pendingLeads : leadManagement.leads.filter(l => l.status === 'pending').length}
+                  </div>
+                </div>
+                <div>
+                  <div className="text-xs lg:text-sm text-gray-500">In Progress</div>
+                  <div className="text-lg lg:text-2xl font-bold text-blue-600">
+                    {sharedDataFlow.isConnected ? sharedDataFlow.stats.inProgressLeads : leadManagement.leads.filter(l => l.status === 'in-progress').length}
+                  </div>
+                </div>
+                <div>
+                  <div className="text-xs lg:text-sm text-gray-500">Completed</div>
+                  <div className="text-lg lg:text-2xl font-bold text-green-600">
+                    {sharedDataFlow.isConnected ? sharedDataFlow.stats.completedLeads : leadManagement.leads.filter(l => l.processed).length}
+                  </div>
+                </div>
               </div>
               <a 
                 href="/manager-dashboard" 
-                className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors text-sm font-medium"
+                className="px-4 py-2 lg:px-6 lg:py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors text-sm lg:text-base font-semibold shadow-sm"
               >
                 Manager Dashboard
               </a>
@@ -358,63 +114,89 @@ export default function RepDashboard() {
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      {/* Responsive Main Content */}
+      <div className="flex-1 overflow-hidden">
+        <div className="max-w-screen-2xl mx-auto px-6 lg:px-8 py-6 h-full">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-full min-w-0">
           
-          {/* Left Side - Lead List */}
-          <div className="space-y-4">
-            <LeadList
-              leads={leads}
-              selectedLead={selectedLead}
-              onLeadSelect={handleLeadSelect}
-              getStatusColor={getStatusColor}
-              getStatusText={getStatusText}
-              campaignInfo={campaignInfo}
+          {/* Left Side - Lead List and Campaign Management */}
+          <div className="lg:col-span-5 space-y-6 overflow-hidden flex flex-col order-2 lg:order-1 min-w-0">
+            {/* Connection Status */}
+            <ConnectionStatus
+              isConnected={sharedDataFlow.isConnected}
+              totalLeads={sharedDataFlow.stats.totalLeads}
+              pendingLeads={sharedDataFlow.stats.pendingLeads}
+              inProgressLeads={sharedDataFlow.stats.inProgressLeads}
+              completedLeads={sharedDataFlow.stats.completedLeads}
             />
+            
+
+            
+            {/* Campaign Manager - Hidden on mobile, visible on desktop */}
+            <div className="hidden lg:block flex-shrink-0 min-w-0">
+              <CampaignManager
+                campaigns={campaignManagement.campaigns}
+                selectedCampaignId={campaignManagement.selectedCampaignId}
+                onCampaignChange={campaignManagement.handleCampaignChange}
+                notifications={campaignManagement.notifications}
+                onNotificationMarkAsRead={campaignManagement.handleNotificationMarkAsRead}
+                onNotificationDismiss={campaignManagement.handleNotificationDismiss}
+                campaignLeads={getCurrentCampaignLeads()}
+                onLeadSelect={leadManagement.handleLeadSelect}
+                selectedLead={leadManagement.selectedLead}
+                activeLeadList={activeLeadList}
+                onLeadListChange={setActiveLeadList}
+              />
+            </div>
           </div>
 
-          {/* Right Side - Lead Management */}
-          <div className="space-y-4">
+                    {/* Right Side - Lead Management */}
+          <div className="lg:col-span-7 overflow-hidden order-1 lg:order-2 min-w-0">
             <LeadManagement
-              selectedLead={selectedLead}
+              selectedLead={leadManagement.selectedLead}
               activeTab={activeTab}
-              selectedPhoneNumber={selectedPhoneNumber}
-              copiedMessage={copiedMessage}
-              onTabChange={setActiveTab}
-              onCopyMessage={handleCopyMessage}
+              selectedPhoneNumber={leadManagement.selectedPhoneNumber}
+              copiedMessage={leadManagement.copiedMessage}
+              onTabChange={(tab: TabType) => setActiveTab(tab)}
+              onCopyMessage={leadManagement.handleCopyMessage}
               onGenerateFollowUp={() => {
-                if (selectedLead) {
-                  setCopiedMessage(generateMessage(selectedLead, selectedPhoneNumber, 'follow-up'));
+                if (leadManagement.selectedLead) {
+                  const followUpMessage = leadManagement.generateMessage(leadManagement.selectedLead, leadManagement.selectedPhoneNumber, 'follow-up');
+                  leadManagement.setCopiedMessage(followUpMessage);
                 }
               }}
-              onMarkComplete={() => selectedLead && markLeadComplete(selectedLead.id)}
-              onNextPhoneNumber={handleNextPhoneNumber}
-              onPreviousPhoneNumber={handlePreviousPhoneNumber}
-              onPhoneNumberSelect={handlePhoneNumberSelect}
+              onMarkComplete={() => leadManagement.selectedLead && leadManagement.markLeadComplete(leadManagement.selectedLead.id)}
+              onNextPhoneNumber={leadManagement.handleNextPhoneNumber}
+              onPreviousPhoneNumber={leadManagement.handlePreviousPhoneNumber}
+              onPhoneNumberSelect={leadManagement.handlePhoneNumberSelect}
               onUpdateStatus={(phoneNumber, newStatus) => {
-                if (selectedLead) {
-                  updatePhoneNumberStatus(selectedLead.id, phoneNumber, newStatus);
+                if (leadManagement.selectedLead) {
+                  // TODO: Implement phone number status update
+                  console.log('Update status:', phoneNumber, newStatus);
                 }
               }}
               onUpdateType={(phoneNumber, newType) => {
-                if (selectedLead) {
-                  updatePhoneNumberType(selectedLead.id, phoneNumber, newType);
-                }
+                if (leadManagement.selectedLead) {
+                  // TODO: Implement phone number type update
+                  console.log('Update type:', phoneNumber, newType);
+            }
               }}
               onUpdateRelationship={(phoneNumber, newRelationship) => {
-                if (selectedLead) {
-                  updatePhoneNumberRelationship(selectedLead.id, phoneNumber, newRelationship);
+                if (leadManagement.selectedLead) {
+                  // TODO: Implement phone number relationship update
+                  console.log('Update relationship:', phoneNumber, newRelationship);
                 }
               }}
               onUpdateNotes={(phoneNumber, newNotes) => {
-                if (selectedLead) {
-                  updatePhoneNumberNotes(selectedLead.id, phoneNumber, newNotes);
+                if (leadManagement.selectedLead) {
+                  // TODO: Implement phone number notes update
+                  console.log('Update notes:', phoneNumber, newNotes);
                 }
               }}
               onAddPhoneNumber={(newPhoneNumber) => {
-                if (selectedLead) {
-                  addPhoneNumberToLead(selectedLead.id, newPhoneNumber);
+                if (leadManagement.selectedLead) {
+                  // TODO: Implement phone number
+                  console.log('Add phone number:', newPhoneNumber);
                 }
               }}
               getPhoneStatusColor={getPhoneStatusColor}
@@ -422,9 +204,37 @@ export default function RepDashboard() {
               getPhoneStatusText={getPhoneStatusText}
               getRelationshipText={getRelationshipText}
               getNextStatus={getNextStatus}
-              currentLeadProgress={currentLeadIndex + 1}
-              totalLeads={leads.length}
+              currentLeadProgress={leadManagement.currentLeadIndex + 1}
+              totalLeads={leadManagement.leads.length}
+              
+              // Lead List props
+              leads={getCurrentCampaignLeads()}
+              onLeadSelect={leadManagement.handleLeadSelect}
+              getStatusColor={getStatusColor}
+              getStatusText={getStatusText}
+              campaignInfo={getCurrentCampaignInfo()}
+              
+              // Template system integration
+              templates={templateSystem.templates}
+              onTemplateSelect={(template, message) => {
+                leadManagement.setCopiedMessage(message);
+                console.log('Template selected:', template.name, 'Message:', message);
+              }}
+              onRecordMessageSent={(leadId, templateSequence, phoneNumber, message) => {
+                templateSystem.recordMessageSent(leadId, templateSequence, phoneNumber, message);
+                console.log('Message recorded:', { leadId, templateSequence, phoneNumber });
+              }}
+              getLastTemplateSent={templateSystem.getLastTemplateSent}
+              activeLeadList={activeLeadList}
             />
+            
+            {/* AI Window - Below Lead Management */}
+            <AIWindow
+              selectedLead={leadManagement.selectedLead}
+              selectedPhoneNumber={leadManagement.selectedPhoneNumber}
+              activeLeadList={activeLeadList}
+            />
+          </div>
           </div>
         </div>
       </div>
