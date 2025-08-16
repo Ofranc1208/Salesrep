@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { Lead, mockLeadLists, mockSalesReps, mockMessageTemplates, MessageTemplate, LeadList } from './utils/mock-data';
 import LeftPanel from './components/left-panel/LeftPanel';
 import MainArea from './components/main-area/MainArea';
+import Header from './components/header/Header';
 
 export default function ManagerDashboard() {
   const [leadLists, setLeadLists] = useState(mockLeadLists);
@@ -69,26 +70,45 @@ export default function ManagerDashboard() {
     }
   };
 
+  const activeList = leadLists.find(list => list.id === activeListId);
+
   return (
-    <div className="flex h-screen bg-gray-100">
-      <LeftPanel
-        leadLists={leadLists}
-        activeListId={activeListId}
-        onSelectList={handleSelectList}
-        onFileUpload={handleFileUpload}
-        onAssignClick={handleAssignClick}
-        selectedLeadCount={Object.keys(rowSelection).length}
-        showAssignControls={showAssignControls}
-        messageTemplates={messageTemplates}
-        onTemplatesChange={handleTemplatesChange}
-        onDeleteList={handleDeleteList}
+    <div className="h-screen bg-gray-50 flex flex-col overflow-hidden">
+      {/* Header */}
+      <Header 
+        activeList={activeList}
+        selectedCount={Object.keys(rowSelection).length}
+        totalLeads={leads.length}
       />
-      <MainArea
-        leads={leads}
-        rowSelection={rowSelection}
-        setRowSelection={setRowSelection}
-        messageTemplates={messageTemplates}
-      />
+      
+      {/* Main Content */}
+      <div className="flex flex-1 overflow-hidden">
+        {/* Left Sidebar - Fixed Width */}
+        <div className="w-72 flex-shrink-0 bg-white shadow-lg overflow-y-auto">
+          <LeftPanel
+            leadLists={leadLists}
+            activeListId={activeListId}
+            onSelectList={handleSelectList}
+            onFileUpload={handleFileUpload}
+            onAssignClick={handleAssignClick}
+            selectedLeadCount={Object.keys(rowSelection).length}
+            showAssignControls={showAssignControls}
+            messageTemplates={messageTemplates}
+            onTemplatesChange={handleTemplatesChange}
+            onDeleteList={handleDeleteList}
+          />
+        </div>
+        
+        {/* Main Content Area - Flexible Width */}
+        <div className="flex-1 flex flex-col overflow-hidden">
+          <MainArea
+            leads={leads}
+            rowSelection={rowSelection}
+            setRowSelection={setRowSelection}
+            messageTemplates={messageTemplates}
+          />
+        </div>
+      </div>
     </div>
   );
 }

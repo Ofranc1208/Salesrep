@@ -42,7 +42,7 @@ export interface StructuredSettlementDetails {
 }
 
 export interface Lead {
-  id: number;
+  id: string; // Changed to string to match shared system and prevent duplicate keys
   crmId: string;
   clientName: string;
   campaignName: string;
@@ -67,4 +67,25 @@ export interface CampaignInfo {
   endDate: string;
 }
 
-export type TabType = 'overview' | 'client-details' | 'messages';
+export interface Campaign {
+  id: string;
+  name: string;
+  totalLeads: number;
+  processedLeads: number;
+  status: 'active' | 'paused' | 'completed';
+  startDate: string;
+  endDate: string;
+  managerName: string;
+}
+
+export interface LeadNotification {
+  id: string;
+  campaignName: string;
+  leadCount: number;
+  managerName: string;
+  timestamp: string;
+  isRead: boolean;
+  campaignId: string;
+}
+
+export type TabType = 'overview' | 'client-details' | 'lead-list';

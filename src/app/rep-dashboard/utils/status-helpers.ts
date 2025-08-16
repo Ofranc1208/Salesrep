@@ -45,7 +45,7 @@ export const getPhoneStatusTextColor = (status: string) => {
 export const getPhoneStatusText = (status: string) => {
   switch (status) {
     case 'working': return 'Working';
-    case 'disconnected': return 'Disconnected';
+    case 'disconnected': return 'Disc.';
     case 'voicemail': return 'Voicemail';
     case 'busy': return 'Busy';
     case 'bad': return 'Bad';
