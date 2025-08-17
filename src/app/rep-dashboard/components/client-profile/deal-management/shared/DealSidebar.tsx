@@ -15,108 +15,105 @@ const DealSidebar: React.FC<DealSidebarProps> = ({
     'active-deals': {
       name: 'Active Deals',
       icon: '🔄',
-      color: 'blue',
-      description: 'Current deal progress & stages'
+      color: 'blue'
     },
     'deal-history': {
       name: 'Deal History',
       icon: '📋',
-      color: 'green',
-      description: 'Completed deals & timeline'
+      color: 'green'
     },
     'deal-analytics': {
       name: 'Deal Analytics',
       icon: '📊',
-      color: 'purple',
-      description: 'Performance metrics & insights'
+      color: 'purple'
     },
     'deal-templates': {
       name: 'Deal Templates',
       icon: '📄',
-      color: 'orange',
-      description: 'Contract templates & forms'
+      color: 'orange'
     },
     'deal-documents': {
       name: 'Deal Documents',
       icon: '📁',
-      color: 'indigo',
-      description: 'Document integration status'
-    }
-  };
-
-  const getSectionColor = (color: string) => {
-    switch (color) {
-      case 'blue': return 'border-blue-200 bg-blue-50 hover:bg-blue-100';
-      case 'green': return 'border-green-200 bg-green-50 hover:bg-green-100';
-      case 'purple': return 'border-purple-200 bg-purple-50 hover:bg-purple-100';
-      case 'orange': return 'border-orange-200 bg-orange-50 hover:bg-orange-100';
-      case 'indigo': return 'border-indigo-200 bg-indigo-50 hover:bg-indigo-100';
-      default: return 'border-gray-200 bg-gray-50 hover:bg-gray-100';
+      color: 'indigo'
     }
   };
 
   return (
-    <div className="w-72 bg-gray-50 border-r border-gray-200 p-4">
-      <h3 className="text-sm font-semibold text-gray-900 mb-3 flex items-center space-x-2">
-        <span>💼</span>
-        <span>Deal Management</span>
-      </h3>
-      <div className="space-y-2">
-        {Object.entries(dealSections).map(([key, section]) => (
-          <button
-            key={key}
-            onClick={() => onSectionChange(key)}
-            className={`w-full text-left p-3 rounded-lg border transition-colors ${
-              activeSection === key 
-                ? `${getSectionColor(section.color)} border-${section.color}-300 shadow-sm` 
-                : 'border-gray-200 bg-white hover:bg-gray-50'
-            }`}
-          >
-            <div className="flex items-center space-x-3">
-              <span className="text-lg">{section.icon}</span>
-              <div className="flex-1">
-                <div className="font-medium text-sm text-gray-900">{section.name}</div>
-                <div className="text-xs text-gray-500 leading-tight">
-                  {section.description}
-                </div>
+    <div className="flex flex-col h-full">
+      {/* Navigation */}
+      <div className="p-4">
+        <div className="space-y-1">
+          {Object.entries(dealSections).map(([key, section]) => (
+            <button
+              key={key}
+              onClick={() => onSectionChange(key)}
+              className={`w-full text-left px-3 py-2 rounded-lg transition-colors flex items-center space-x-3 ${
+                activeSection === key 
+                  ? 'bg-blue-100 text-blue-800 border border-blue-200' 
+                  : 'text-gray-700 hover:bg-gray-100'
+              }`}
+            >
+              <span className="text-base">{section.icon}</span>
+              <span className="font-medium text-sm">{section.name}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Deal Overview - Moved Higher */}
+      <div className="px-4 pb-4 border-t border-gray-200">
+        <div className="mt-4 space-y-3">
+          <h4 className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Deal Overview</h4>
+          
+          {/* Deal Commission */}
+          <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-lg p-3">
+            <div className="flex items-center space-x-2 mb-2">
+              <span className="text-sm">💰</span>
+              <span className="text-sm font-medium text-green-800">Commission</span>
+            </div>
+            <div className="text-center mb-2">
+              <span className="text-lg font-bold text-green-700">$175,623.21</span>
+            </div>
+            <div className="flex justify-between text-xs">
+              <span className="text-green-600">Earned: <span className="font-semibold">$15,000</span></span>
+              <span className="text-orange-600">Pending: <span className="font-semibold">$35,000</span></span>
+            </div>
+          </div>
+          
+          {/* Life Contingent Status */}
+          <div className="bg-orange-50 border border-orange-200 rounded-lg p-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <span className="text-sm">📋</span>
+                <span className="text-sm font-medium text-orange-800">Life Contingent</span>
               </div>
             </div>
-          </button>
-        ))}
-      </div>
+            <p className="text-xs text-orange-600 mt-1">Requires medical review</p>
+          </div>
 
-      {/* Quick Stats */}
-      <div className="mt-6 p-4 bg-white rounded-lg border border-gray-200">
-        <h4 className="text-sm font-semibold text-gray-900 mb-3">Quick Stats</h4>
-        <div className="space-y-2 text-xs">
-          <div className="flex justify-between">
-            <span className="text-gray-600">Active Deals:</span>
-            <span className="font-medium text-blue-600">3</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-gray-600">Pending Docs:</span>
-            <span className="font-medium text-orange-600">7</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-gray-600">This Month:</span>
-            <span className="font-medium text-green-600">$45K</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-gray-600">Avg. Close Time:</span>
-            <span className="font-medium text-purple-600">21 days</span>
+          {/* Quick Stats - Compact */}
+          <div className="bg-white border border-gray-200 rounded-lg p-3">
+            <div className="grid grid-cols-2 gap-2 text-xs">
+              <div className="text-center">
+                <div className="font-semibold text-blue-600">3</div>
+                <div className="text-gray-500">Active</div>
+              </div>
+              <div className="text-center">
+                <div className="font-semibold text-orange-600">7</div>
+                <div className="text-gray-500">Pending</div>
+              </div>
+              <div className="text-center">
+                <div className="font-semibold text-green-600">$45K</div>
+                <div className="text-gray-500">This Month</div>
+              </div>
+              <div className="text-center">
+                <div className="font-semibold text-purple-600">21d</div>
+                <div className="text-gray-500">Avg Close</div>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
-
-      {/* Mobile App Integration Note */}
-      <div className="mt-4 p-3 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
-        <div className="flex items-center space-x-2 mb-1">
-          <span className="text-sm">📱</span>
-          <span className="text-xs font-medium text-blue-700">Mobile Ready</span>
-        </div>
-        <p className="text-xs text-blue-600">
-          All endpoints ready for React Native integration
-        </p>
       </div>
     </div>
   );

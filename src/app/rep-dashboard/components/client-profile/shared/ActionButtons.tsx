@@ -4,13 +4,13 @@ import React from 'react';
 
 interface ActionButtonsProps {
   onDocumentsClick?: () => void;
-  onBHQClick?: () => void;
+  onAgreementHubClick?: () => void;
   onClientManagementClick?: () => void;
 }
 
 const ActionButtons: React.FC<ActionButtonsProps> = ({
   onDocumentsClick,
-  onBHQClick,
+  onAgreementHubClick,
   onClientManagementClick
 }) => {
   return (
@@ -28,15 +28,15 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({
       </button>
       
       <button 
-        onClick={onBHQClick}
+        onClick={onAgreementHubClick}
         className="flex flex-col items-center space-y-2 p-4 rounded-xl hover:bg-gray-50 transition-all duration-200 hover:scale-105"
       >
         <div className="w-14 h-14 bg-green-100 rounded-full flex items-center justify-center">
           <svg className="w-7 h-7 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
           </svg>
         </div>
-        <span className="text-sm font-medium text-gray-700">BHQ</span>
+        <span className="text-sm font-medium text-gray-700">Agreement Hub</span>
       </button>
       
       <button 

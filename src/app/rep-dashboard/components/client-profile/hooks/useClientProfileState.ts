@@ -22,6 +22,9 @@ export const useClientProfileState = () => {
   // Deal Management Hub state
   const [showDealManagementHub, setShowDealManagementHub] = useState(false);
 
+  // Agreement Hub state
+  const [showAgreementHub, setShowAgreementHub] = useState(false);
+
   const toggleSection = (section: SectionKey) => {
     setExpandedSections(prev => ({
       ...prev,
@@ -65,6 +68,8 @@ export const useClientProfileState = () => {
     setShowDocumentHub,
     showDealManagementHub,
     setShowDealManagementHub,
+    showAgreementHub,
+    setShowAgreementHub,
     toggleSection,
     expandAll,
     collapseAll

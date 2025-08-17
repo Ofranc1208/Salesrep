@@ -7,6 +7,7 @@ import { Lead } from '../../types';
 import { ActionButtons, ExpandCollapseControls } from './shared';
 import { DocumentHub } from './document-hub';
 import { DealManagementHub } from './deal-management';
+import { AgreementHub } from './agreement-hub';
 import { LeftColumn, MiddleColumn, RightColumn } from './sections';
 import { useClientProfileState } from './hooks';
 import { getClientData, annuityData, offerData, mockNotes, getVisibleSections, handleAddActivity } from './utils';
@@ -45,15 +46,17 @@ export default function ClientProfile({
   getNextStatus
 }: ClientProfileProps) {
   // Use custom hook for state management
-  const {
-    expandedSections,
-    showDocumentHub,
-    setShowDocumentHub,
-    showDealManagementHub,
+    const { 
+    expandedSections, 
+    showDocumentHub, 
+    setShowDocumentHub, 
+    showDealManagementHub, 
     setShowDealManagementHub,
-    toggleSection,
-    expandAll,
-    collapseAll
+    showAgreementHub,
+    setShowAgreementHub,
+    toggleSection, 
+    expandAll, 
+    collapseAll 
   } = useClientProfileState();
 
   const visibleSections = getVisibleSections(leadType);
@@ -78,7 +81,7 @@ export default function ClientProfile({
       {/* Action Buttons */}
       <ActionButtons 
         onDocumentsClick={() => setShowDocumentHub(true)}
-        onBHQClick={() => console.log('BHQ clicked')}
+        onAgreementHubClick={() => setShowAgreementHub(true)}
         onClientManagementClick={() => setShowDealManagementHub(true)}
       />
 
@@ -144,6 +147,14 @@ export default function ClientProfile({
         <DealManagementHub 
           selectedLead={selectedLead}
           onClose={() => setShowDealManagementHub(false)}
+        />
+      )}
+
+      {/* Agreement Hub Modal */}
+      {showAgreementHub && (
+        <AgreementHub 
+          selectedLead={selectedLead}
+          onClose={() => setShowAgreementHub(false)}
         />
       )}
     </div>

@@ -51,48 +51,13 @@ const DealManagementHub: React.FC<DealManagementHubProps> = ({ selectedLead, onC
         />
 
         <div className="flex flex-1 overflow-hidden">
-          {/* Left Sidebar with Deal Summary */}
-          <div className="w-80 bg-gray-50 border-r border-gray-200 flex flex-col">
+          {/* Left Sidebar - Cleaner Layout */}
+          <div className="w-72 bg-gray-50 border-r border-gray-200 flex flex-col">
             {/* Navigation Sidebar */}
             <DealSidebar 
               activeSection={activeSection}
               onSectionChange={setActiveSection}
             />
-            
-            {/* Deal Summary Cards */}
-            <div className="p-4 space-y-3 border-t border-gray-200">
-              <h3 className="text-sm font-medium text-gray-700 mb-3">Deal Overview</h3>
-              
-              <div className="bg-gradient-to-r from-orange-50 to-red-50 border border-orange-200 rounded-lg p-3">
-                <div className="flex items-center space-x-2">
-                  <span className="text-xl">📋</span>
-                  <div>
-                    <h4 className="font-medium text-orange-800 text-sm">Life Contingent</h4>
-                    <p className="text-xs text-orange-600">Requires medical review</p>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-3">
-                <div className="flex items-center space-x-2">
-                  <span className="text-xl">🎯</span>
-                  <div>
-                    <h4 className="font-medium text-blue-800 text-sm">K-Pack Process</h4>
-                    <p className="text-xs text-blue-600">Target: 2024-01-10</p>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-200 rounded-lg p-3">
-                <div className="flex items-center space-x-2">
-                  <span className="text-xl">📊</span>
-                  <div>
-                    <h4 className="font-medium text-purple-800 text-sm">65%</h4>
-                    <p className="text-xs text-purple-600">3 of 5 stages completed</p>
-                  </div>
-                </div>
-              </div>
-            </div>
           </div>
 
           {/* Main Content */}

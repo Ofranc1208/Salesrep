@@ -152,12 +152,12 @@ const ActiveDeals: React.FC<ActiveDealsProps> = ({ selectedLead, searchTerm }) =
           </div>
         </div>
 
-        {/* Stage Cards Grid */}
+        {/* Enhanced Stage Cards Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-5 gap-4">
           {dealData.stages.map((stage, index) => (
             <div 
               key={stage.id}
-              className={`bg-white border rounded-lg p-4 transition-all duration-200 hover:shadow-md cursor-pointer ${
+              className={`relative bg-white border rounded-lg p-4 transition-all duration-200 hover:shadow-md cursor-pointer ${
                 stage.status === 'completed' ? 'border-green-200 bg-green-50' :
                 stage.status === 'in-progress' ? 'border-blue-200 bg-blue-50' : 
                 'border-gray-200 bg-gray-50'
@@ -178,9 +178,12 @@ const ActiveDeals: React.FC<ActiveDealsProps> = ({ selectedLead, searchTerm }) =
                 }`}>
                   {stage.name}
                 </h4>
+                {stage.status === 'in-progress' && (
+                  <div className="text-xs text-blue-600 font-medium mt-1">In Progress</div>
+                )}
               </div>
 
-              {/* Clean Progress Bar & Percentage */}
+              {/* Clean Progress Section */}
               <div className="mb-4">
                 <div className="flex items-center justify-between text-xs text-gray-500 mb-2">
                   <span>{stage.completedTasks}/{stage.totalTasks} Tasks</span>
@@ -197,19 +200,22 @@ const ActiveDeals: React.FC<ActiveDealsProps> = ({ selectedLead, searchTerm }) =
                 </div>
               </div>
 
-              {/* Expanded Task List (Only when clicked) */}
+              {/* Enhanced Task List */}
               {expandedStage === stage.id && stage.status !== 'locked' && (
-                <div className="space-y-2 border-t border-gray-200 pt-3">
+                <div className="space-y-1 border-t border-gray-200 pt-3 mt-3">
                   {stage.tasks.map((task, taskIndex) => (
-                    <div key={taskIndex} className="flex items-center space-x-2">
+                    <div key={taskIndex} className="flex items-center space-x-2 py-1">
                       <div className={`w-2 h-2 rounded-full flex-shrink-0 ${
                         task.completed ? 'bg-green-500' : 'bg-gray-300'
                       }`}></div>
                       <span className={`text-xs ${
-                        task.completed ? 'text-gray-600 line-through' : 'text-gray-700'
+                        task.completed ? 'text-green-700 line-through' : 'text-gray-700'
                       }`}>
                         {task.name}
                       </span>
+                      {task.completed && (
+                        <span className="text-green-500 text-xs ml-auto">✓</span>
+                      )}
                     </div>
                   ))}
                 </div>
