@@ -1,16 +1,15 @@
 'use client';
 
 import React, { useState } from 'react';
-import LeadManagement from './components/lead-management/LeadManagement';
-import CampaignManager from './components/campaign-management/CampaignManager';
+import { LeadManagement } from './components/lead-management/lead-management';
+import { CampaignManager } from './components/campaign-management';
 import DashboardHeader from './components/core-components/DashboardHeader';
 import { useLeadManagement } from './hooks/useLeadManagement';
 import { useCampaignManagement } from './hooks/useCampaignManagement';
 import { useTemplates } from './hooks/useTemplates';
 import { getStatusColor, getStatusText, getPhoneStatusColor, getPhoneStatusTextColor, getPhoneStatusText, getRelationshipText, getNextStatus } from './utils/status-helpers';
 import { useSharedDataFlow } from './hooks/useSharedDataFlow';
-import ConnectionStatus from './components/core-components/ConnectionStatus';
-import AIWindow from './components/ai-assistant/AIWindow';
+import OzAIAssistant from './components/ai-assistant/OzAIAssistant';
 import { CampaignInfo, TabType } from './types';
 import { campaignLeads } from './utils/mock-data/campaign-leads';
 
@@ -64,19 +63,13 @@ export default function RepDashboard() {
 
       {/* Main Content */}
       <div className="flex-1 overflow-hidden">
-        <div className="max-w-screen-2xl mx-auto px-6 lg:px-8 py-6 h-full">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-full min-w-0">
+        <div className="max-w-screen-2xl mx-auto px-6 lg:px-8 py-4 h-full">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 h-full min-w-0">
           
-            {/* Left Side - Lead List and Campaign Management */}
-            <div className="lg:col-span-4 space-y-6 overflow-hidden flex flex-col order-2 lg:order-1 min-w-0">
-              {/* Connection Status */}
-              <ConnectionStatus
-                isConnected={sharedDataFlow.isConnected}
-                totalLeads={sharedDataFlow.stats.totalLeads}
-                pendingLeads={sharedDataFlow.stats.pendingLeads}
-                inProgressLeads={sharedDataFlow.stats.inProgressLeads}
-                completedLeads={sharedDataFlow.stats.completedLeads}
-              />
+            {/* Left Side - Oz AI Assistant and Campaign Management */}
+            <div className="lg:col-span-4 space-y-4 overflow-hidden flex flex-col order-2 lg:order-1 min-w-0">
+              {/* Oz AI Assistant - Replaces ConnectionStatus */}
+              <OzAIAssistant />
               
               {/* Campaign Manager - Hidden on mobile, visible on desktop */}
               <div className="hidden lg:block flex-shrink-0 min-w-0">
@@ -92,6 +85,10 @@ export default function RepDashboard() {
                   selectedLead={leadManagement.selectedLead}
                   activeLeadList={activeLeadList}
                   onLeadListChange={setActiveLeadList}
+                  onLeadsReceived={(leads, campaignId) => {
+                    console.log(`Received ${leads.length} leads for campaign ${campaignId}`);
+                    // Handle leads received from manager - could integrate with leadManagement
+                  }}
                 />
               </div>
             </div>
@@ -171,13 +168,6 @@ export default function RepDashboard() {
                   console.log('Message recorded:', { leadId, templateSequence, phoneNumber });
                 }}
                 getLastTemplateSent={templateSystem.getLastTemplateSent}
-                activeLeadList={activeLeadList}
-              />
-              
-              {/* AI Window - Below Lead Management */}
-              <AIWindow
-                selectedLead={leadManagement.selectedLead}
-                selectedPhoneNumber={leadManagement.selectedPhoneNumber}
                 activeLeadList={activeLeadList}
               />
             </div>

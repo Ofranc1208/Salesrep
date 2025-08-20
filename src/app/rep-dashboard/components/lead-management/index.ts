@@ -1,9 +1,9 @@
-// Lead Management Components
-export { default as LeadManagement } from './LeadManagement';
-export { default as LeadOverview } from './LeadOverview';
-export { default as LeadList } from './LeadList';
-export { default as LeadTable } from './LeadTable';
-export { default as LeadTableRow } from './LeadTableRow';
-export { default as LeadListHeader } from './LeadListHeader';
-export { default as LeadPagination } from './LeadPagination';
-export { default as LeadEmptyState } from './LeadEmptyState';
+// Modular Lead Management Components
+export * from './lead-management';
+export * from './lead-overview';
+export * from './lead-list';
+
+// Lead Processing Modules (lead-intake moved to campaign-management)
+export * from './lead-enrichment';
+export * from './lead-assignment';
+export * from './shared';

@@ -1,15 +1,5 @@
 // Campaign data for the Rep Dashboard - Structured Settlement Company
-
-export interface Campaign {
-  id: string;
-  name: string;
-  totalLeads: number;
-  processedLeads: number;
-  status: 'active' | 'paused' | 'completed';
-  startDate: string;
-  endDate: string;
-  managerName: string;
-}
+import { Campaign } from '../../types';
 
 // Multiple campaigns for the sales rep
 export const mockCampaigns: Campaign[] = [
@@ -21,7 +11,8 @@ export const mockCampaigns: Campaign[] = [
     status: 'active' as const,
     startDate: '2024-01-01',
     endDate: '2024-03-31',
-    managerName: 'Sarah Manager'
+    managerName: 'Sarah Manager',
+    createdAt: '2024-01-01T08:00:00.000Z'
   },
   {
     id: 'december-2023',
@@ -31,7 +22,8 @@ export const mockCampaigns: Campaign[] = [
     status: 'completed' as const,
     startDate: '2023-12-01',
     endDate: '2023-12-31',
-    managerName: 'Mike Director'
+    managerName: 'Mike Director',
+    createdAt: '2023-12-01T08:00:00.000Z'
   },
   {
     id: 'november-2023',
@@ -41,7 +33,8 @@ export const mockCampaigns: Campaign[] = [
     status: 'completed' as const,
     startDate: '2023-11-01',
     endDate: '2023-11-30',
-    managerName: 'Lisa VP'
+    managerName: 'Lisa VP',
+    createdAt: '2023-11-01T08:00:00.000Z'
   },
   {
     id: 'february-2024',
@@ -51,6 +44,7 @@ export const mockCampaigns: Campaign[] = [
     status: 'paused' as const,
     startDate: '2024-02-01',
     endDate: '2024-02-29',
-    managerName: 'David Senior'
+    managerName: 'David Senior',
+    createdAt: '2024-02-01T08:00:00.000Z'
   }
 ];

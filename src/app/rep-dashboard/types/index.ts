@@ -41,6 +41,14 @@ export interface StructuredSettlementDetails {
   offerAmount: string;
 }
 
+export interface ClientInfo {
+  ssn?: string;
+  dateOfBirth?: string;
+  futureNPV?: string;
+  currentOffers?: string;
+  additionalFields?: Record<string, any>;
+}
+
 export interface Lead {
   id: string; // Changed to string to match shared system and prevent duplicate keys
   crmId: string;
@@ -49,6 +57,7 @@ export interface Lead {
   phoneNumbers: PhoneNumber[];
   payment: string;
   startDate: string;
+  endDate?: string;
   insuranceCompany: string;
   status: string;
   messageHistory: Message[];
@@ -57,6 +66,17 @@ export interface Lead {
   processed: boolean;
   phoneNumbersProcessed: number;
   structuredSettlementDetails: StructuredSettlementDetails;
+  
+  // Extended properties for lead management
+  structuredSettlement: StructuredSettlementDetails;
+  clientInfo?: ClientInfo;
+  priority: 'High' | 'Medium' | 'Low';
+  messages: Message[];
+  lastActivity: string;
+  assignedTo?: string;
+  assignedAt?: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface CampaignInfo {
@@ -76,6 +96,7 @@ export interface Campaign {
   startDate: string;
   endDate: string;
   managerName: string;
+  createdAt: string;
 }
 
 export interface LeadNotification {

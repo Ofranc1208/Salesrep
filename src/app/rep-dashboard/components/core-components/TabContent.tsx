@@ -3,9 +3,9 @@
 import React from 'react';
 import { Lead, TabType } from '../../types';
 import { MessageTemplate } from '../../../shared/TemplateService';
-import LeadOverview from '../lead-management/LeadOverview';
+import { LeadOverview } from '../lead-management/lead-overview';
 import ClientProfile from '../client-profile/ClientProfile';
-import LeadList from '../lead-management/LeadList';
+import { LeadList } from '../lead-management/lead-list';
 
 interface TabContentProps {
   activeTab: TabType;
