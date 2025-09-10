@@ -93,7 +93,7 @@ export default function TabContent({
   }
 
   return (
-    <div className="flex-1 overflow-y-auto px-4 py-3 min-w-0">
+    <div className="flex-1 overflow-y-auto px-4 py-3 min-w-0" style={{ maxHeight: 'calc(100vh - 180px)' }}>
       {activeTab === 'overview' && (
         <LeadOverview
           selectedLead={selectedLead}

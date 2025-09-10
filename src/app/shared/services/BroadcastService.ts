@@ -46,7 +46,7 @@ class BroadcastService {
   private initializeChannel(): void {
     if (typeof window !== 'undefined' && 'BroadcastChannel' in window) {
       this.channel = new BroadcastChannel(CHANNEL_NAME);
-      console.log('BroadcastService: Channel initialized');
+      // console.log('BroadcastService: Channel initialized'); // Commented out to reduce console noise
     } else {
       console.warn('BroadcastService: BroadcastChannel not available');
     }
@@ -56,8 +56,8 @@ class BroadcastService {
    * Broadcast data to all tabs
    */
   broadcast(type: BroadcastEventType, data: any): void {
-    console.log('BroadcastService: Broadcasting to all tabs:', { type, data, tabId: TAB_ID });
-    
+    // console.log('BroadcastService: Broadcasting to all tabs:', { type, data, tabId: TAB_ID }); // Commented out to reduce console noise
+
     if (this.channel) {
       this.channel.postMessage({ type, data, tabId: TAB_ID });
     } else {
@@ -69,8 +69,8 @@ class BroadcastService {
    * Subscribe to broadcast messages
    */
   subscribe(eventType: BroadcastEventType, callback: (data: any) => void): () => void {
-    console.log('BroadcastService: Subscribing to', eventType);
-    
+    // console.log('BroadcastService: Subscribing to', eventType); // Commented out to reduce console noise
+
     // Add to local listeners
     if (!this.listeners.has(eventType)) {
       this.listeners.set(eventType, []);
@@ -80,7 +80,7 @@ class BroadcastService {
     // Set up channel listener if not already done
     if (this.channel && !this.channel.onmessage) {
       this.channel.onmessage = (event: MessageEvent<BroadcastMessage>) => {
-        console.log('BroadcastService: Received message:', event.data);
+        // console.log('BroadcastService: Received message:', event.data); // Commented out to reduce console noise
         this.handleBroadcastMessage(event.data);
       };
     }
@@ -103,12 +103,12 @@ class BroadcastService {
   private handleBroadcastMessage(message: BroadcastMessage): void {
     // Ignore messages from this same tab to prevent feedback loops
     if (message.tabId === TAB_ID) {
-      console.log('BroadcastService: Ignoring self-broadcast:', message.type);
+      // console.log('BroadcastService: Ignoring self-broadcast:', message.type); // Commented out to reduce console noise
       return;
     }
 
-    console.log('BroadcastService: Processing message from other tab:', { type: message.type, fromTab: message.tabId });
-    
+    // console.log('BroadcastService: Processing message from other tab:', { type: message.type, fromTab: message.tabId }); // Commented out to reduce console noise
+
     const listeners = this.listeners.get(message.type);
     if (listeners) {
       listeners.forEach(callback => {
@@ -150,7 +150,7 @@ class BroadcastService {
       this.channel = null;
     }
     this.listeners.clear();
-    console.log('BroadcastService: Cleaned up');
+    // console.log('BroadcastService: Cleaned up'); // Commented out to reduce console noise
   }
 }
 

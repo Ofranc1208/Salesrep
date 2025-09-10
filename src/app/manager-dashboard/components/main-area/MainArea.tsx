@@ -158,8 +158,9 @@ const MainArea: React.FC<MainAreaProps> = ({ leads, rowSelection, setRowSelectio
             <button
               onClick={() => setShowTestView(!showTestView)}
               className="px-4 py-2 bg-purple-600 text-white text-sm rounded hover:bg-purple-700 transition-colors"
+              title="Toggle between main lead list and data flow testing interface"
             >
-              {showTestView ? 'Show Lead List' : 'Test Data Flow'}
+              {showTestView ? '📋 Show Lead List' : '🧪 Test Data Flow'}
             </button>
             <div className="flex items-center space-x-2 bg-gray-50 px-3 py-2 rounded-lg">
               <span className="text-sm text-gray-600">Quick Select:</span>

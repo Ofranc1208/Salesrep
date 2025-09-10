@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Lead } from '../../../../types';
-import { LeadListManager } from '../../active-leads';
+import { LeadListManager } from './lead-lists';
 
 interface LeadsTabProps {
   campaignLeads: Lead[];

@@ -24,13 +24,13 @@ export const useDataFlow = () => {
 
   // Load all leads
   const loadLeads = useCallback(() => {
-    console.log('useDataFlow: loadLeads called');
+    // console.log('useDataFlow: loadLeads called'); // Commented out to reduce console noise
     setLoading(true);
     try {
       const allLeads = dataFlowService.getAllLeads();
       const newStats = dataFlowService.getAssignmentStats();
-      console.log('useDataFlow: loadLeads result', { allLeads, newStats });
-      
+      // console.log('useDataFlow: loadLeads result', { allLeads, newStats }); // Commented out to reduce console noise
+
       // Update shared state and broadcast
       updateSharedState(allLeads, newStats);
       

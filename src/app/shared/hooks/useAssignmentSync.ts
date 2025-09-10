@@ -21,25 +21,25 @@ export const useAssignmentSync = (onDataChange: () => void) => {
   useEffect(() => {
     // Subscribe to assignment updates from other tabs
     const unsubscribeAssignment = broadcastService.subscribe('ASSIGNMENT_UPDATE', (data: AssignmentData) => {
-      console.log('useAssignmentSync: Received assignment update:', data);
-      
+      // console.log('useAssignmentSync: Received assignment update:', data); // Commented out to reduce console noise
+
       const { leadId, repId, campaignId, assignedAt, leadData } = data;
-      
+
       // Ensure the lead exists in local data service
       if (leadData) {
         // Add the lead if it doesn't exist
         const existingLead = dataFlowService.getAllLeads().find(lead => lead.id === leadId);
         if (!existingLead) {
-          console.log('useAssignmentSync: Adding missing lead before assignment:', leadData);
+          // console.log('useAssignmentSync: Adding missing lead before assignment:', leadData); // Commented out to reduce console noise
           dataFlowService.addLead(leadData);
         }
       }
-      
+
       // Import assignment to local data service
       dataFlowService.importAssignment(leadId, repId, campaignId, new Date(assignedAt));
-      
-      console.log('useAssignmentSync: Assignment imported successfully');
-      
+
+      // console.log('useAssignmentSync: Assignment imported successfully'); // Commented out to reduce console noise
+
       // Notify parent component of data change
       onDataChange();
     });
@@ -55,9 +55,9 @@ export const useAssignmentSync = (onDataChange: () => void) => {
   const broadcastAssignment = (leadId: string, repId: string, campaignId: string, assignedAt: Date) => {
     // Get the lead data to include in the broadcast
     const leadData = dataFlowService.getAllLeads().find(lead => lead.id === leadId);
-    
-    console.log('useAssignmentSync: Broadcasting assignment:', { leadId, repId, campaignId, leadData });
-    
+
+    // console.log('useAssignmentSync: Broadcasting assignment:', { leadId, repId, campaignId, leadData }); // Commented out to reduce console noise
+
     // Broadcast assignment data to other tabs
     broadcastService.broadcastAssignmentUpdate(leadId, repId, campaignId, assignedAt, leadData);
   };

@@ -6,7 +6,6 @@ import { Lead } from '../../../../types';
 interface DataQualitySummaryProps {
   validLeads: Lead[];
 }
-
 export default function DataQualitySummary({ validLeads }: DataQualitySummaryProps) {
   const completeProfiles = validLeads.filter(lead => 
     lead.clientInfo?.ssn !== 'Not Available' && 
@@ -59,3 +58,4 @@ export default function DataQualitySummary({ validLeads }: DataQualitySummaryPro
     </div>
   );
 }
+

@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import ChatMessage from './ChatMessage';
 import ChatInput from './ChatInput';
 import TypingIndicator from './TypingIndicator';
+import { useAIOrchestrator } from '../hooks/useAIOrchestrator';
 
 interface ChatMessage {
   id: string;
@@ -21,11 +22,14 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedPriority }) => {
     {
       id: '1',
       type: 'assistant',
-      content: "Good evening Rep One. Hope you are having a great day. If you have any questions, I'm here to help.",
+      content: "Good evening Rep One. I'm Oz, your AI assistant with full awareness of your campaigns and priorities. How can I help you today?",
       timestamp: new Date()
     }
   ]);
   const [isTyping, setIsTyping] = useState(false);
+  
+  // AI Orchestrator hook
+  const aiOrchestrator = useAIOrchestrator();
 
   const handleSendMessage = async (content: string) => {
     // Add user message
@@ -40,18 +44,39 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedPriority }) => {
     // Show typing indicator
     setIsTyping(true);
 
-    // Simulate AI response delay
-    setTimeout(() => {
-      const aiResponse = generateAIResponse(content);
-      const assistantMessage: ChatMessage = {
+    try {
+      // Process query through AI orchestrator with context
+      const context = {
+        selectedPriority,
+        timestamp: new Date().toISOString()
+      };
+      
+      const aiResponse = await aiOrchestrator.processQuery(content, context);
+      
+      // Add AI response
+      const responseMessage: ChatMessage = {
         id: (Date.now() + 1).toString(),
         type: 'assistant',
-        content: aiResponse,
+        content: aiResponse.content,
         timestamp: new Date()
       };
-      setMessages(prev => [...prev, assistantMessage]);
+      
+      setMessages(prev => [...prev, responseMessage]);
+    } catch (error) {
+      console.error('Error getting AI response:', error);
+      
+      // Fallback response
+      const errorMessage: ChatMessage = {
+        id: (Date.now() + 1).toString(),
+        type: 'assistant',
+        content: "I'm having trouble processing your request right now. Please try again.",
+        timestamp: new Date()
+      };
+      
+      setMessages(prev => [...prev, errorMessage]);
+    } finally {
       setIsTyping(false);
-    }, 1500);
+    }
   };
 
   const generateAIResponse = (userMessage: string) => {

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { LeadManagement } from './components/lead-management/lead-management';
 import { CampaignManager } from './components/campaign-management';
 import DashboardHeader from './components/core-components/DashboardHeader';
@@ -10,8 +10,9 @@ import { useTemplates } from './hooks/useTemplates';
 import { getStatusColor, getStatusText, getPhoneStatusColor, getPhoneStatusTextColor, getPhoneStatusText, getRelationshipText, getNextStatus } from './utils/status-helpers';
 import { useSharedDataFlow } from './hooks/useSharedDataFlow';
 import OzAIAssistant from './components/ai-assistant/OzAIAssistant';
-import { CampaignInfo, TabType } from './types';
+import { CampaignInfo, TabType, Lead } from './types';
 import { campaignLeads } from './utils/mock-data/campaign-leads';
+import { useLeadWorkflow } from './components/lead-workflow';
 
 // Default campaign info
 const campaignInfo: CampaignInfo = {
@@ -26,15 +27,36 @@ export default function RepDashboard() {
   const [activeTab, setActiveTab] = useState<TabType>('overview');
   const [activeLeadList, setActiveLeadList] = useState<'prospect' | 'hot' | 'warm' | 'active'>('prospect');
 
+  // Lead Workflow Orchestrator - NEW: Central coordination
+  const leadWorkflow = useLeadWorkflow();
+
   // Lead Management Hook
   const leadManagement = useLeadManagement();
 
   // Campaign Management Hook
   const campaignManagement = useCampaignManagement();
 
-  // Get current campaign leads based on active lead list
+  // Shared Data Flow Hook - Connect to Manager Dashboard
+  const sharedDataFlow = useSharedDataFlow('rep-1');
+
+  // Template Management Hook
+  const templateSystem = useTemplates('Client Relations Rep One');
+
+  // Sync campaign changes with workflow
+  useEffect(() => {
+    const selectedCampaign = campaignManagement.campaigns.find(
+      c => c.id === campaignManagement.selectedCampaignId
+    );
+    
+    if (selectedCampaign) {
+      leadWorkflow.setActiveCampaign(selectedCampaign.id, selectedCampaign);
+    }
+  }, [campaignManagement.selectedCampaignId, campaignManagement.campaigns, leadWorkflow.setActiveCampaign]);
+
+  // Get current campaign leads through workflow (enriched with context)
   const getCurrentCampaignLeads = () => {
-    return campaignLeads[activeLeadList] || [];
+    const rawLeads = campaignLeads[activeLeadList] || [];
+    return leadWorkflow.getCampaignLeads(rawLeads);
   };
 
   // Get current campaign info for display
@@ -47,11 +69,16 @@ export default function RepDashboard() {
     };
   };
 
-  // Shared Data Flow Hook - Connect to Manager Dashboard
-  const sharedDataFlow = useSharedDataFlow('rep-1');
+  // Handle lead selection through workflow
+  const handleLeadSelect = (lead: any) => {
+    leadWorkflow.selectLead(lead);
+    leadManagement.handleLeadSelect(lead);
+  };
 
-  // Template Management Hook
-  const templateSystem = useTemplates('Client Relations Rep One');
+  // Handle lead status updates through workflow
+  const handleLeadStatusUpdate = (leadId: string, newStatus: string, details?: any) => {
+    leadWorkflow.updateLeadStatus(leadId, newStatus, details);
+  };
 
   return (
     <div className="h-screen bg-gray-50 flex flex-col overflow-hidden">
@@ -67,12 +94,12 @@ export default function RepDashboard() {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 h-full min-w-0">
           
             {/* Left Side - Oz AI Assistant and Campaign Management */}
-            <div className="lg:col-span-4 space-y-4 overflow-hidden flex flex-col order-2 lg:order-1 min-w-0">
+            <div className="lg:col-span-5 space-y-4 overflow-hidden flex flex-col order-2 lg:order-1 min-w-0">
               {/* Oz AI Assistant - Replaces ConnectionStatus */}
               <OzAIAssistant />
               
               {/* Campaign Manager - Hidden on mobile, visible on desktop */}
-              <div className="hidden lg:block flex-shrink-0 min-w-0">
+              <div className="hidden lg:block flex-1 min-w-0 overflow-hidden">
                 <CampaignManager
                   campaigns={campaignManagement.campaigns}
                   selectedCampaignId={campaignManagement.selectedCampaignId}
@@ -80,8 +107,8 @@ export default function RepDashboard() {
                   notifications={campaignManagement.notifications}
                   onNotificationMarkAsRead={campaignManagement.handleNotificationMarkAsRead}
                   onNotificationDismiss={campaignManagement.handleNotificationDismiss}
-                  campaignLeads={getCurrentCampaignLeads()}
-                  onLeadSelect={leadManagement.handleLeadSelect}
+                  campaignLeads={getCurrentCampaignLeads() as unknown as Lead[]}
+                  onLeadSelect={handleLeadSelect}
                   selectedLead={leadManagement.selectedLead}
                   activeLeadList={activeLeadList}
                   onLeadListChange={setActiveLeadList}
@@ -89,12 +116,13 @@ export default function RepDashboard() {
                     console.log(`Received ${leads.length} leads for campaign ${campaignId}`);
                     // Handle leads received from manager - could integrate with leadManagement
                   }}
+                  repId="rep-1"
                 />
               </div>
             </div>
 
             {/* Right Side - Lead Management */}
-            <div className="lg:col-span-8 overflow-hidden order-1 lg:order-2 min-w-0">
+            <div className="lg:col-span-7 overflow-hidden order-1 lg:order-2 min-w-0">
               <LeadManagement
                 selectedLead={leadManagement.selectedLead}
                 activeTab={activeTab}
@@ -108,14 +136,18 @@ export default function RepDashboard() {
                     leadManagement.setCopiedMessage(followUpMessage);
                   }
                 }}
-                onMarkComplete={() => leadManagement.selectedLead && leadManagement.markLeadComplete(leadManagement.selectedLead.id)}
+                onMarkComplete={() => {
+                  if (leadManagement.selectedLead) {
+                    leadWorkflow.completeLead(leadManagement.selectedLead.id);
+                    leadManagement.markLeadComplete(leadManagement.selectedLead.id);
+                  }
+                }}
                 onNextPhoneNumber={leadManagement.handleNextPhoneNumber}
                 onPreviousPhoneNumber={leadManagement.handlePreviousPhoneNumber}
                 onPhoneNumberSelect={leadManagement.handlePhoneNumberSelect}
                 onUpdateStatus={(phoneNumber, newStatus) => {
                   if (leadManagement.selectedLead) {
-                    // TODO: Implement phone number status update
-                    console.log('Update status:', phoneNumber, newStatus);
+                    handleLeadStatusUpdate(leadManagement.selectedLead.id, newStatus, { phoneNumber });
                   }
                 }}
                 onUpdateType={(phoneNumber, newType) => {
@@ -151,8 +183,8 @@ export default function RepDashboard() {
                 totalLeads={leadManagement.leads.length}
                 
                 // Lead List props
-                leads={getCurrentCampaignLeads()}
-                onLeadSelect={leadManagement.handleLeadSelect}
+                leads={getCurrentCampaignLeads() as unknown as Lead[]}
+                onLeadSelect={handleLeadSelect}
                 getStatusColor={getStatusColor}
                 getStatusText={getStatusText}
                 campaignInfo={getCurrentCampaignInfo()}

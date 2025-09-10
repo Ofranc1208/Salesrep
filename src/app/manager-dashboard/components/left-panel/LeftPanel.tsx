@@ -22,6 +22,8 @@ interface LeftPanelProps {
   messageTemplates: any[];
   onTemplatesChange: (templates: any[]) => void;
   onDeleteList?: (listId: string) => void;
+  selectedLeads: Lead[];
+  onAssignmentComplete: () => void;
 }
 
 const LeftPanel: React.FC<LeftPanelProps> = ({ 
@@ -34,7 +36,9 @@ const LeftPanel: React.FC<LeftPanelProps> = ({
   showAssignControls,
   messageTemplates,
   onTemplatesChange,
-  onDeleteList
+  onDeleteList,
+  selectedLeads,
+  onAssignmentComplete
 }) => {
   // File upload state
   const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
@@ -118,6 +122,8 @@ const LeftPanel: React.FC<LeftPanelProps> = ({
           selectedLeadCount={selectedLeadCount}
           onAssignClick={onAssignClick}
           showAssignControls={showAssignControls}
+          selectedLeads={selectedLeads}
+          onAssignmentComplete={onAssignmentComplete}
         />
 
         {/* Action Buttons */}

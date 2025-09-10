@@ -8,7 +8,8 @@ export { CampaignManager } from './campaign-manager';
 export * from './lead-intake';
 
 // Active Leads Module - Complete lead list management system
-export * from './active-leads';
+// Note: active-leads moved to campaign-manager/tabs/lead-lists/
+// export * from './active-leads'; // DEPRECATED - moved to tabs/lead-lists/
 
 // Campaign Manager Module - Campaign overview and management
 export * from './campaign-manager';

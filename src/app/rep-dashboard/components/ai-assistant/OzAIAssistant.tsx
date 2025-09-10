@@ -18,7 +18,7 @@ const OzAIAssistant: React.FC<OzAIAssistantProps> = ({ onPriorityItemSelect }) =
   };
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-2 flex-shrink-0">
       {/* Component 1: Chat Window - AI Conversation Interface */}
       <ChatWindow selectedPriority={selectedPriority} />
 

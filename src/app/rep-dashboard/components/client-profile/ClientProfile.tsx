@@ -77,7 +77,7 @@ export default function ClientProfile({
   const clientData = getClientData(selectedLead);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 max-h-full overflow-y-auto">
       {/* Action Buttons */}
       <ActionButtons 
         onDocumentsClick={() => setShowDocumentHub(true)}
@@ -91,8 +91,8 @@ export default function ClientProfile({
         onCollapseAll={collapseAll}
       />
 
-      {/* Client Profile Cards */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      {/* Client Profile Cards - Optimized for Desktop */}
+      <div className="grid grid-cols-1 xl:grid-cols-3 lg:grid-cols-2 gap-4">
         {/* Left Column */}
         <LeftColumn
           selectedLead={selectedLead}

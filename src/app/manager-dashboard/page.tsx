@@ -50,6 +50,19 @@ export default function ManagerDashboard() {
     setMessageTemplates(newTemplates);
   };
 
+  const getSelectedLeads = (): Lead[] => {
+    return Object.keys(rowSelection)
+      .map(index => leads[parseInt(index)])
+      .filter(lead => lead !== undefined);
+  };
+
+  const handleAssignmentComplete = () => {
+    // Clear row selection after successful assignment
+    setRowSelection({});
+    // Hide assignment controls
+    setShowAssignControls(false);
+  };
+
   const handleDeleteList = (listId: string) => {
     // Remove the list from leadLists
     const updatedLists = leadLists.filter(list => list.id !== listId);
@@ -96,6 +109,8 @@ export default function ManagerDashboard() {
             messageTemplates={messageTemplates}
             onTemplatesChange={handleTemplatesChange}
             onDeleteList={handleDeleteList}
+            selectedLeads={getSelectedLeads()}
+            onAssignmentComplete={handleAssignmentComplete}
           />
         </div>
         

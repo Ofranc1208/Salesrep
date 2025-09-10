@@ -1,7 +1,7 @@
 export interface SalesRep {
   id: string;
   name: string;
-  activeLeads: number;
+  activeLeads: number; // Keep for backwards compatibility but won't display
 }
 
 export interface MessageTemplate {
@@ -41,9 +41,9 @@ export interface LeadList {
 }
 
 export const mockSalesReps: SalesRep[] = [
-  { id: '1', name: 'John Doe', activeLeads: 15 },
-  { id: '2', name: 'Jane Smith', activeLeads: 8 },
-  { id: '3', name: 'Peter Jones', activeLeads: 12 },
+  { id: 'rep-1', name: 'Client Relations Rep 1', activeLeads: 15 },
+  { id: 'rep-2', name: 'Client Relations Rep 2', activeLeads: 8 },
+  { id: 'rep-3', name: 'Client Relations Rep 3', activeLeads: 12 },
 ];
 
 export const mockMessageTemplates: MessageTemplate[] = [

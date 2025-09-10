@@ -15,17 +15,9 @@ export interface CampaignManagerProps {
   onLeadListChange: (listType: 'prospect' | 'hot' | 'warm' | 'active') => void;
 }
 
-export interface CampaignHeaderProps {
-  selectedCampaign?: Campaign;
-  notifications: LeadNotification[];
-  onNotificationMarkAsRead: (notificationId: string) => void;
-  onNotificationDismiss: (notificationId: string) => void;
-}
-
-export interface CampaignSummaryProps {
-  campaign?: Campaign;
-  activeLeadList: 'prospect' | 'hot' | 'warm' | 'active';
-}
+// DEPRECATED TYPES - Moved or orphaned
+// export interface CampaignHeaderProps { ... } // DEPRECATED - Orphaned file, not used
+// export interface CampaignSummaryProps { ... } // DEPRECATED - Moved to tabs/analytics/types.ts
 
 // Campaign Analytics Types
 export interface CampaignMetrics {
